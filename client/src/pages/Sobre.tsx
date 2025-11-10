@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Target, Eye, User } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 export default function Sobre() {
   return (
@@ -95,57 +96,82 @@ export default function Sobre() {
           </div>
 
           {/* Sobre o Fundador */}
-          <Card className="border-2">
-            <CardContent className="pt-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-6 w-6 text-primary" />
-                </div>
-                <h2 className="text-2xl font-bold">Sobre o Fundador</h2>
-              </div>
-
-              <div className="grid md:grid-cols-[300px_1fr] gap-8">
-                {/* Foto do Proprietário - Placeholder */}
-                <div className="flex justify-center md:justify-start">
-                  <div className="w-[300px] h-[300px] rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/20 flex items-center justify-center">
-                    <div className="text-center">
-                      <User className="h-20 w-20 text-primary/40 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        Foto do Fundador<br />
-                        (Espaço reservado)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Texto sobre o Proprietário - Placeholder editável */}
-                <div className="flex flex-col justify-center">
-                  <div className="prose prose-lg max-w-none">
-                    <p className="text-foreground/80 leading-relaxed mb-4">
-                      <em className="text-muted-foreground">
-                        [Este espaço está reservado para você adicionar informações sobre o fundador 
-                        da empresa - até 1500 caracteres]
-                      </em>
-                    </p>
-                    <p className="text-foreground/80 leading-relaxed">
-                      Aqui você poderá compartilhar sua trajetória profissional, experiências que 
-                      o levaram a criar o Sistema Sem Fronteira, sua visão sobre tecnologia e 
-                      inovação, e o que o motiva a desenvolver soluções que transformam a vida 
-                      das pessoas. Este espaço é seu para contar sua história e conectar-se com 
-                      parceiros, colaboradores e usuários de forma autêntica e inspiradora.
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-4">
-                      <strong>Nota:</strong> Para editar este conteúdo e adicionar sua foto, 
-                      você poderá utilizar o painel administrativo (funcionalidade a ser implementada 
-                      futuramente) ou entrar em contato com o suporte técnico.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <FounderSection />
         </div>
       </div>
     </div>
+  );
+}
+
+function FounderSection() {
+  const aboutQuery = trpc.admin.getAboutContent.useQuery();
+
+  const data = aboutQuery.data;
+
+  return (
+    <Card className="border-2">
+      <CardContent className="pt-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <User className="h-6 w-6 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold">Sobre o Fundador</h2>
+        </div>
+
+        <div className="grid md:grid-cols-[300px_1fr] gap-8">
+          {/* Foto do Proprietário */}
+          <div className="flex justify-center md:justify-start">
+            {data?.ownerPhotoUrl ? (
+              <img
+                src={data.ownerPhotoUrl}
+                alt="Fundador"
+                className="w-[300px] h-[300px] rounded-lg object-cover border-2 border-primary/20"
+              />
+            ) : (
+              <div className="w-[300px] h-[300px] rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/20 flex items-center justify-center">
+                <div className="text-center">
+                  <User className="h-20 w-20 text-primary/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    Foto do Fundador<br />
+                    (Espaço reservado)
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Texto sobre o Proprietário */}
+          <div className="flex flex-col justify-center">
+            <div className="prose prose-lg max-w-none">
+              {data?.ownerBio ? (
+                <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                  {data.ownerBio}
+                </p>
+              ) : (
+                <>
+                  <p className="text-foreground/80 leading-relaxed mb-4">
+                    <em className="text-muted-foreground">
+                      [Este espaço está reservado para informações sobre o fundador 
+                      - até 1500 caracteres]
+                    </em>
+                  </p>
+                  <p className="text-foreground/80 leading-relaxed">
+                    Aqui você poderá compartilhar sua trajetória profissional, experiências que 
+                    o levaram a criar o Sistema Sem Fronteira, sua visão sobre tecnologia e 
+                    inovação, e o que o motiva a desenvolver soluções que transformam a vida 
+                    das pessoas. Este espaço é seu para contar sua história e conectar-se com 
+                    parceiros, colaboradores e usuários de forma autêntica e inspiradora.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    <strong>Nota:</strong> Para editar este conteúdo e adicionar sua foto, 
+                    acesse o painel administrativo em /admin.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

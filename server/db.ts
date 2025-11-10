@@ -168,3 +168,22 @@ export async function upsertAboutContent(content: Partial<InsertAboutContent>) {
     await db.insert(aboutContent).values(content as InsertAboutContent);
   }
 }
+
+// Funções para deletar contatos e candidaturas
+export async function deleteContact(id: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.delete(contacts).where(eq(contacts.id, id));
+}
+
+export async function deleteJobApplication(id: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.delete(jobApplications).where(eq(jobApplications.id, id));
+}

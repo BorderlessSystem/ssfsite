@@ -1,11 +1,12 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createContact, createJobApplication } from "./db";
+import { createContact, createJobApplication, getAllContacts, getAllJobApplications, getAboutContent, upsertAboutContent, deleteContact, deleteJobApplication } from "./db";
 import { storagePut } from "./storage";
 import { notifyOwner } from "./_core/notification";
+import { TRPCError } from "@trpc/server";
 
 export const appRouter = router({
   system: systemRouter,
@@ -84,6 +85,109 @@ export const appRouter = router({
         });
 
         return { success: true };
+      }),
+  }),
+
+  admin: router({
+    // Verificar se é admin
+    checkAdmin: protectedProcedure.query(({ ctx }) => {
+      if (ctx.user?.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
+      }
+      return { isAdmin: true };
+    }),
+
+    // Listar contatos
+    listContacts: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
+      }
+      return await getAllContacts();
+    }),
+
+    // Deletar contato
+    deleteContact: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN' });
+        }
+        await deleteContact(input.id);
+        return { success: true };
+      }),
+
+    // Listar candidaturas
+    listJobApplications: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
+      }
+      return await getAllJobApplications();
+    }),
+
+    // Deletar candidatura
+    deleteJobApplication: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN' });
+        }
+        await deleteJobApplication(input.id);
+        return { success: true };
+      }),
+
+    // Obter informações do fundador
+    getAboutContent: publicProcedure.query(async () => {
+      return await getAboutContent();
+    }),
+
+    // Atualizar informações do fundador
+    updateAboutContent: protectedProcedure
+      .input(z.object({
+        mission: z.string().optional(),
+        vision: z.string().optional(),
+        ownerPhotoUrl: z.string().optional(),
+        ownerPhotoKey: z.string().optional(),
+        ownerBio: z.string().max(1500, "Biografia não pode exceder 1500 caracteres").optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN' });
+        }
+        await upsertAboutContent(input);
+        return { success: true };
+      }),
+
+    // Upload de foto do fundador
+    uploadFounderPhoto: protectedProcedure
+      .input(z.object({
+        imageFile: z.object({
+          name: z.string(),
+          type: z.string(),
+          data: z.string(), // base64
+        }),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN' });
+        }
+
+        // Fazer upload da imagem para S3
+        const buffer = Buffer.from(input.imageFile.data, 'base64');
+        const fileKey = `founder-photo/photo-${Date.now()}.jpg`;
+        
+        const { url } = await storagePut(
+          fileKey,
+          buffer,
+          input.imageFile.type
+        );
+
+        // Atualizar no banco de dados
+        await upsertAboutContent({
+          ownerPhotoUrl: url,
+          ownerPhotoKey: fileKey,
+        });
+
+        return { success: true, url };
       }),
   }),
 });

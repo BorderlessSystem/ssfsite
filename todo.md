@@ -62,3 +62,14 @@
 - [x] Adicionar arquivo _redirects para roteamento SPA
 - [x] Adicionar netlify.toml com configurações de build
 - [x] Testar configurações de deploy
+
+## Painel Administrativo
+- [x] Criar rotas tRPC para listar contatos e candidaturas
+- [x] Criar rotas tRPC para atualizar informações do fundador
+- [x] Criar página de login do admin
+- [x] Criar dashboard com abas para contatos, candidaturas e fundador
+- [x] Implementar visualização de contatos com opção de deletar
+- [x] Implementar visualização de candidaturas com download de currículo
+- [x] Implementar editor de foto do fundador (upload 500x500)
+- [x] Implementar editor de biografia do fundador (1500 caracteres)
+- [x] Testar todas as funcionalidades do painel

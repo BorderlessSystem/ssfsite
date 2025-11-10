@@ -12,6 +12,7 @@ import Sobre from "./pages/Sobre";
 import Contato from "./pages/Contato";
 import TrabalheConosco from "./pages/TrabalheConosco";
 import TermosLGPD from "./pages/TermosLGPD";
+import Admin from "./pages/Admin";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
           <Route path="/contato" component={Contato} />
           <Route path="/trabalhe-conosco" component={TrabalheConosco} />
           <Route path="/termos-lgpd" component={TermosLGPD} />
+          <Route path="/admin" component={Admin} />
           <Route path={"/404"} component={NotFound} />
           {/* Final fallback route */}
           <Route component={NotFound} />
