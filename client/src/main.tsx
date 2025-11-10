@@ -8,34 +8,7 @@ import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
-      onError: (error) => {
-        // Silenciar erros de OAuth não configurado
-        if (error instanceof Error && error.message?.includes('OAUTH_SERVER_URL')) {
-          console.warn('[TRPC] OAuth não configurado, ignorando erro');
-          return;
-        }
-        // Para outros erros, logar normalmente
-        console.error('[TRPC Query Error]', error);
-      }
-    },
-    mutations: {
-      onError: (error) => {
-        // Silenciar erros de OAuth não configurado
-        if (error instanceof Error && error.message?.includes('OAUTH_SERVER_URL')) {
-          console.warn('[TRPC] OAuth não configurado, ignorando erro');
-          return;
-        }
-        // Para outros erros, logar normalmente
-        console.error('[TRPC Mutation Error]', error);
-      }
-    }
-  }
-});
+const queryClient = new QueryClient();
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
@@ -51,11 +24,6 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
-    // Silenciar erros de OAuth não configurado
-    if (error instanceof Error && error.message?.includes('OAUTH_SERVER_URL')) {
-      console.warn('[TRPC] OAuth não configurado, ignorando erro de cache');
-      return;
-    }
     redirectToLoginIfUnauthorized(error);
     console.error("[API Query Error]", error);
   }
@@ -64,11 +32,6 @@ queryClient.getQueryCache().subscribe(event => {
 queryClient.getMutationCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.mutation.state.error;
-    // Silenciar erros de OAuth não configurado
-    if (error instanceof Error && error.message?.includes('OAUTH_SERVER_URL')) {
-      console.warn('[TRPC] OAuth não configurado, ignorando erro de cache');
-      return;
-    }
     redirectToLoginIfUnauthorized(error);
     console.error("[API Mutation Error]", error);
   }

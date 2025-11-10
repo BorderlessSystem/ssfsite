@@ -57,3 +57,8 @@
 - [x] Verificar responsividade em mobile/tablet/desktop
 - [x] Otimizar imagens e performance
 - [x] Criar checkpoint final
+
+## Deploy Netlify
+- [x] Adicionar arquivo _redirects para roteamento SPA
+- [x] Adicionar netlify.toml com configurações de build
+- [x] Testar configurações de deploy

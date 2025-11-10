@@ -16,15 +16,6 @@ export function useAuth(options?: UseAuthOptions) {
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
-    onError: (error) => {
-      // Silenciar erro de OAuth não configurado - não exibir notificação
-      if (error.message?.includes('OAUTH_SERVER_URL')) {
-        console.warn('[Auth] OAuth não configurado, continuando sem autenticação');
-        return;
-      }
-      // Para outros erros, deixar passar para tratamento padrão
-      console.error('[Auth] Erro na autenticação:', error);
-    }
   });
 
   const logoutMutation = trpc.auth.logout.useMutation({

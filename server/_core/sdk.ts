@@ -32,8 +32,8 @@ class OAuthService {
   constructor(private client: ReturnType<typeof axios.create>) {
     console.log("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
     if (!ENV.oAuthServerUrl) {
-      console.warn(
-        "[OAuth] OAUTH_SERVER_URL não está configurado. Autenticação será desabilitada."
+      console.error(
+        "[OAuth] ERROR: OAUTH_SERVER_URL is not configured! Set OAUTH_SERVER_URL environment variable."
       );
     }
   }
@@ -273,12 +273,6 @@ class SDKServer {
     // If user not in DB, sync from OAuth server automatically
     if (!user) {
       try {
-        // Verificar se o OAuth está configurado antes de tentar sincronizar
-        if (!ENV.oAuthServerUrl) {
-          console.warn("[Auth] OAuth não configurado, pulando sincronização de usuário");
-          throw ForbiddenError("OAuth not configured");
-        }
-        
         const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
         await db.upsertUser({
           openId: userInfo.openId,
@@ -289,11 +283,6 @@ class SDKServer {
         });
         user = await db.getUserByOpenId(userInfo.openId);
       } catch (error) {
-        // Silenciar erro de OAuth não configurado
-        if (error instanceof Error && error.message === "OAuth not configured") {
-          console.warn("[Auth] OAuth não configurado, continuando sem autenticação");
-          throw ForbiddenError("OAuth not configured");
-        }
         console.error("[Auth] Failed to sync user from OAuth:", error);
         throw ForbiddenError("Failed to sync user info");
       }
