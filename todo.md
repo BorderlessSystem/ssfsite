@@ -73,3 +73,12 @@
 - [x] Implementar editor de foto do fundador (upload 500x500)
 - [x] Implementar editor de biografia do fundador (1500 caracteres)
 - [x] Testar todas as funcionalidades do painel
+
+## Integração Resend e Notificações por Email
+- [x] Instalar dependência Resend
+- [x] Configurar variável de ambiente RESEND_API_KEY
+- [x] Criar função de envio de email para contatos
+- [x] Criar função de envio de email para candidaturas
+- [x] Integrar notificações de email nos routers
+- [x] Testar envio de emails
+- [x] Preparar site para subdomínio cloud.sistemasemfronteira.com.br

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createContact, createJobApplication, getAllContacts, getAllJobApplications, getAboutContent, upsertAboutContent, deleteContact, deleteJobApplication } from "./db";
 import { storagePut } from "./storage";
 import { notifyOwner } from "./_core/notification";
+import { sendContactNotification, sendJobApplicationNotification } from "./_core/email";
 import { TRPCError } from "@trpc/server";
 
 export const appRouter = router({
@@ -30,6 +31,13 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         await createContact({
+          name: input.name,
+          email: input.email,
+          phone: input.phone,
+        });
+
+        // Enviar email de notificação
+        await sendContactNotification({
           name: input.name,
           email: input.email,
           phone: input.phone,
@@ -76,6 +84,14 @@ export const appRouter = router({
           phone: input.phone,
           resumeUrl: url,
           resumeKey: fileKey,
+        });
+
+        // Enviar email de notificação
+        await sendJobApplicationNotification({
+          name: input.name,
+          email: input.email,
+          phone: input.phone,
+          resumeUrl: url,
         });
 
         // Notificar proprietário
